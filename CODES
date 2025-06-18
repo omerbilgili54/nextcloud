@@ -1,69 +1,37 @@
-# Ubuntu 22.04 Üzerine Nextcloud Kurulumu ve Entegrasyon Rehberi
+#!/bin/bash
 
-Bu rehber, UTM üzerinde temiz bir Ubuntu 22.04 kurulumundan başlayarak Nextcloud’u ayağa kaldırman ve ardından Grafana entegrasyonu gibi ek adımları uygulaman için hazırlanmıştır.
-
----
-
-## 1. Sistemi Güncelle
-
-```bash
+# 1. Sistemi Güncelle
 sudo apt update && sudo apt upgrade -y
-```
-*Açıklama: Sistem paketlerini güncel tutmak güvenlik ve uyumluluk açısından önemlidir.*
 
----
-
-## 2. Gerekli Temel Paketleri Yükle
-
-```bash
+# 2. Gerekli Temel Paketleri Yükle
 sudo apt install -y apache2 mysql-server php php-mysql libapache2-mod-php php-xml php-gd php-curl php-zip php-mbstring php-intl php-bcmath php-gmp wget unzip
-```
-*Açıklama: Apache, MySQL ve PHP ile birlikte Nextcloud’un çalışması için gereken ek modüller kuruluyor.*
 
----
+# 3. MySQL/MariaDB Ayarları ve Nextcloud İçin Veritabanı Oluştur
+MYSQL_ROOT_PASS=""  # Varsayılan root şifren yoksa boş bırak
+NC_DB="nextclouddb"
+NC_DB_USER="nextclouduser"
+NC_DB_PASS="GucluBirSifreYaz"  # Şifreni değiştir!
 
-## 3. MySQL/MariaDB Ayarları ve Nextcloud İçin Veritabanı Oluştur
-
-```bash
-sudo mysql -u root
-```
-MySQL ekranında şu komutları sırayla gir:
-
-```sql
-CREATE DATABASE nextclouddb;
-CREATE USER 'nextclouduser'@'localhost' IDENTIFIED BY 'gizli-sifre';
-GRANT ALL PRIVILEGES ON nextclouddb.* TO 'nextclouduser'@'localhost';
+sudo mysql -u root <<EOF
+CREATE DATABASE IF NOT EXISTS $NC_DB;
+CREATE USER IF NOT EXISTS '$NC_DB_USER'@'localhost' IDENTIFIED BY '$NC_DB_PASS';
+GRANT ALL PRIVILEGES ON $NC_DB.* TO '$NC_DB_USER'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
-```
-*Açıklama: Nextcloud için ayrı bir veritabanı ve kullanıcı oluşturuyoruz. `gizli-sifre` kısmını güvenli bir şifreyle değiştir.*
+EOF
 
----
-
-## 4. Nextcloud’u İndir ve Kur
-
-```bash
+# 4. Nextcloud’u İndir ve Kur
 wget https://download.nextcloud.com/server/releases/latest.zip
 unzip latest.zip
 sudo mv nextcloud /var/www/html/
 sudo chown -R www-data:www-data /var/www/html/nextcloud
 sudo chmod -R 755 /var/www/html/nextcloud
-```
-*Açıklama: Nextcloud dosyaları indiriliyor, çıkarılıyor ve web sunucusu kullanıcısına uygun izinler veriliyor.*
 
----
-
-## 5. Apache Ayarları
-
-```bash
-sudo nano /etc/apache2/sites-available/nextcloud.conf
-```
-Aşağıdaki yapılandırmayı dosyaya yapıştır:
-
-```
+# 5. Apache Ayarları
+sudo bash -c 'cat > /etc/apache2/sites-available/nextcloud.conf <<EOL
 <VirtualHost *:80>
     DocumentRoot /var/www/html/nextcloud
-    ServerName yourdomain.com
+    ServerName localhost
 
     <Directory /var/www/html/nextcloud/>
         Require all granted
@@ -71,41 +39,16 @@ Aşağıdaki yapılandırmayı dosyaya yapıştır:
         Options FollowSymLinks MultiViews
     </Directory>
 </VirtualHost>
-```
-Kaydet ve çık.
+EOL'
 
-Apache ayarlarını aktif et:
-```bash
 sudo a2ensite nextcloud.conf
 sudo a2enmod rewrite headers env dir mime
 sudo systemctl reload apache2
-```
-*Açıklama: Nextcloud’a özel bir sanal host tanımlanıyor ve gerekli modüller aktif ediliyor.*
 
----
+echo "Kurulum tamam! Nextcloud web arayüzünden kurulumu tamamlayabilirsin."
+echo "Tarayıcıda şunu aç: http://<sunucu_ip_adresi>/"
 
-## 6. Nextcloud Web Kurulumu
-
-- Tarayıcında `http://<sunucu_ip_adresi>/` veya `http://<sunucu_ip_adresi>/nextcloud` adresini aç.
-- Yönetici hesabı oluştur.
-- Veritabanı olarak:
-  - **Kullanıcı adı:** nextclouduser
-  - **Veritabanı adı:** nextclouddb
-  - **Şifre:** (Adım 3’te verdiğin şifre)
-  - **Veritabanı sunucusu:** localhost
-
-*Açıklama: Nextcloud arayüzünden kurulumun son adımlarını tamamla.*
-
----
-
-## 7. (Opsiyonel) HTTPS Etkinleştirme
-
-Let's Encrypt ile ücretsiz SSL:
-```bash
-sudo apt install -y certbot python3-certbot-apache
-sudo certbot --apache
-```
-*Açıklama: Web siteni güvenli yapmak için SSL sertifikası yükler.*
-
----
-
+# 6. (Opsiyonel) HTTPS Etkinleştirme
+echo "SSL için aşağıdaki komutları çalıştırabilirsin:"
+echo "sudo apt install -y certbot python3-certbot-apache"
+echo "sudo certbot --apache"
