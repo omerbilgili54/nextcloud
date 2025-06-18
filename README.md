@@ -51,4 +51,5 @@ Kurulum sonrası Nextcloud arayüzüne başarılı şekilde erişildi. Dosya yü
 
 
 Muhammet Ömer Bilgili
+
 Serkan Kamilçelebi
