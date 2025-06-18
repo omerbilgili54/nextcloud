@@ -48,3 +48,7 @@ Nextcloud, Ubuntu 22.04 üzerinde aşağıdaki bileşenlerden oluşur ve kendi a
 
 
 Kurulum sonrası Nextcloud arayüzüne başarılı şekilde erişildi. Dosya yükleme, paylaşma ve kullanıcı yönetimi gibi temel işlevler sağlıklı çalışmaktadır. Detaylı kurulum raporu ve ekran görüntüleri için `outputs/` klasörüne bakabilirsiniz.
+
+
+Muhammet Ömer Bilgili
+Serkan Kamilçelebi
