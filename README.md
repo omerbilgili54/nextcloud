@@ -32,6 +32,9 @@ Nextcloud, Ubuntu 22.04 üzerinde aşağıdaki bileşenlerden oluşur ve kendi a
 3. Nextcloud gelen isteği işler, gerekirse veritabanına veya dosya sistemine erişir.
 4. Sonuç kullanıcıya iletilir.
 
+![bigpicture](https://github.com/user-attachments/assets/621cd333-f3c1-4270-9b3b-4ff5a65277dd)
+
+
 ## Nextcloud İle Entegre Servisler
 
 >Ofis/Belge Düzenleme
